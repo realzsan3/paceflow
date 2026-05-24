@@ -1,1228 +1,1352 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>慢慢花 · Paceflow</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Noto+Serif+SC:wght@300;400;600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-:root {
-  --ink:       #1a1a18;
-  --ink2:      #3d3d38;
-  --ink3:      #7a7a70;
-  --paper:     #f5f0e8;
-  --paper2:    #ede8dc;
-  --paper3:    #e0d9cc;
-  --gold:      #b5861a;
-  --gold-lt:   #d4a935;
-  --green:     #2d6a4f;
-  --green-lt:  #40916c;
-  --red:       #9b2226;
-  --red-lt:    #ae2012;
-  --rule:      rgba(26,26,24,0.12);
-  --shadow:    0 2px 16px rgba(26,26,24,0.10);
-  --serif:     'Lora', 'Noto Serif SC', serif;
-  --mono:      'DM Mono', monospace;
-  --radius:    6px;
-}
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-html { font-size: 15px; }
-
-body {
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--serif);
-  min-height: 100vh;
-  background-image:
-    radial-gradient(ellipse at 20% 0%, rgba(181,134,26,0.06) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 100%, rgba(45,106,79,0.05) 0%, transparent 60%);
-}
-
-/* ── 顶栏 ── */
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 32px;
-  border-bottom: 1px solid var(--rule);
-  background: rgba(245,240,232,0.92);
-  backdrop-filter: blur(8px);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.brand { display: flex; align-items: baseline; gap: 10px; }
-
-.brand-zh {
-  font-family: 'Noto Serif SC', serif;
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--ink);
-  letter-spacing: 2px;
-}
-
-.brand-en {
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--gold);
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  font-weight: 500;
-}
-
-.brand-dot {
-  color: var(--ink3);
-  font-weight: 300;
-  font-size: 14px;
-}
-
-.topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* ── 按钮 ── */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 16px;
-  border-radius: var(--radius);
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 1px;
-  cursor: pointer;
-  transition: all 0.18s;
-  border: 1px solid transparent;
-  text-transform: uppercase;
-}
-
-.btn-outline {
-  background: transparent;
-  border-color: var(--rule);
-  color: var(--ink2);
-}
-
-.btn-outline:hover { border-color: var(--ink3); background: var(--paper2); }
-
-.btn-gold {
-  background: var(--gold);
-  color: #fff;
-  border-color: var(--gold);
-}
-
-.btn-gold:hover { background: var(--gold-lt); border-color: var(--gold-lt); }
-
-.btn-sm { padding: 5px 11px; font-size: 10px; }
-
-/* ── 方案标签页 ── */
-.plans-bar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 32px;
-  border-bottom: 1px solid var(--rule);
-  overflow-x: auto;
-  background: var(--paper2);
-}
-
-.plan-tab {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 14px;
-  border-radius: 20px;
-  font-family: var(--mono);
-  font-size: 11px;
-  cursor: pointer;
-  white-space: nowrap;
-  border: 1px solid var(--rule);
-  background: transparent;
-  color: var(--ink3);
-  transition: all 0.18s;
-  user-select: none;
-}
-
-.plan-tab.active {
-  background: var(--ink);
-  color: var(--paper);
-  border-color: var(--ink);
-}
-
-.plan-tab:not(.active):hover { border-color: var(--ink3); color: var(--ink2); }
-
-.plan-tab .del-btn {
-  font-size: 12px;
-  line-height: 1;
-  opacity: 0.5;
-  padding: 0 2px;
-}
-
-.plan-tab .del-btn:hover { opacity: 1; color: var(--red); }
-
-.add-plan-btn {
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-family: var(--mono);
-  font-size: 13px;
-  cursor: pointer;
-  border: 1px dashed var(--rule);
-  background: transparent;
-  color: var(--ink3);
-  transition: all 0.18s;
-  flex-shrink: 0;
-}
-
-.add-plan-btn:hover { border-color: var(--gold); color: var(--gold); }
-
-/* ── 主布局 ── */
-.layout {
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  min-height: calc(100vh - 107px);
-}
-
-/* ── 侧边参数面板 ── */
-.sidebar {
-  padding: 28px 24px;
-  border-right: 1px solid var(--rule);
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  background: rgba(237,232,220,0.5);
-}
-
-.sidebar-section { display: flex; flex-direction: column; gap: 12px; }
-
-.section-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--ink3);
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--rule);
-}
-
-.field { display: flex; flex-direction: column; gap: 5px; }
-
-.field-label {
-  font-size: 12px;
-  color: var(--ink2);
-  font-family: 'Noto Serif SC', serif;
-  font-weight: 400;
-}
-
-.field-label small {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--ink3);
-  margin-left: 4px;
-}
-
-.field-input {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: var(--paper);
-  overflow: hidden;
-  transition: border-color 0.18s;
-}
-
-.field-input:focus-within { border-color: var(--gold); }
-
-.field-input input {
-  flex: 1;
-  padding: 8px 10px;
-  border: none;
-  background: transparent;
-  font-family: var(--mono);
-  font-size: 14px;
-  color: var(--ink);
-  outline: none;
-  width: 100%;
-}
-
-.field-input .unit {
-  padding: 0 10px;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--ink3);
-  background: var(--paper2);
-  border-left: 1px solid var(--rule);
-  height: 100%;
-  display: flex;
-  align-items: center;
-  white-space: nowrap;
-}
-
-.field-hint {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--ink3);
-  line-height: 1.5;
-}
-
-.plan-name-input {
-  width: 100%;
-  padding: 7px 10px;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: var(--paper);
-  font-family: var(--serif);
-  font-size: 13px;
-  color: var(--ink);
-  outline: none;
-  transition: border-color 0.18s;
-}
-
-.plan-name-input:focus { border-color: var(--gold); }
-
-.guardrail-box {
-  padding: 12px 14px;
-  background: var(--paper);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  border-left: 3px solid var(--gold);
-}
-
-.guardrail-box .gb-title {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 1px;
-  color: var(--gold);
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-.guardrail-box .gb-rule {
-  font-size: 11px;
-  color: var(--ink2);
-  line-height: 1.8;
-  font-family: var(--mono);
-}
-
-.sidebar-actions { display: flex; flex-direction: column; gap: 8px; }
-
-/* ── 主内容 ── */
-.main { display: flex; flex-direction: column; overflow: hidden; }
-
-/* ── 摘要栏 ── */
-.summary-bar {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  border-bottom: 1px solid var(--rule);
-}
-
-.summary-card {
-  padding: 16px 20px;
-  border-right: 1px solid var(--rule);
-}
-
-.summary-card:last-child { border-right: none; }
-
-.sc-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--ink3);
-  margin-bottom: 6px;
-}
-
-.sc-value {
-  font-family: var(--mono);
-  font-size: 22px;
-  font-weight: 500;
-  color: var(--ink);
-  line-height: 1;
-}
-
-.sc-sub {
-  font-size: 11px;
-  color: var(--ink3);
-  margin-top: 4px;
-  font-family: var(--mono);
-}
-
-/* ── 图表区 ── */
-.chart-area {
-  padding: 20px 24px 0;
-  border-bottom: 1px solid var(--rule);
-}
-
-.chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.chart-title {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 1px;
-  color: var(--ink3);
-  text-transform: uppercase;
-}
-
-.chart-legend {
-  display: flex;
-  gap: 14px;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--ink3);
-}
-
-.legend-line {
-  width: 20px;
-  height: 2px;
-  border-radius: 1px;
-}
-
-#chartCanvas {
-  width: 100%;
-  display: block;
-}
-
-/* ── 表格区 ── */
-.table-area {
-  flex: 1;
-  overflow: auto;
-  padding: 20px 24px;
-}
-
-.table-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 14px;
-}
-
-.table-title {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 1px;
-  color: var(--ink3);
-  text-transform: uppercase;
-}
-
-table {
-  width: 100%;
-  min-width: 860px;
-  border-collapse: collapse;
-  font-family: var(--mono);
-  font-size: 12px;
-}
-
-thead th {
-  text-align: right;
-  padding: 8px 10px;
-  font-size: 10px;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  color: var(--ink3);
-  border-bottom: 2px solid var(--rule);
-  white-space: nowrap;
-  font-weight: 500;
-}
-
-thead th:first-child { text-align: left; }
-
-tbody tr {
-  border-bottom: 1px solid var(--rule);
-  transition: background 0.1s;
-}
-
-tbody tr:hover { background: var(--paper2); }
-
-tbody tr.depleted { background: rgba(155,34,38,0.04); }
-tbody tr.depleted td { color: var(--ink3); }
-
-tbody tr.cur-year { background: rgba(181,134,26,0.06); }
-
-tbody td {
-  padding: 9px 10px;
-  text-align: right;
-  color: var(--ink2);
-  white-space: nowrap;
-}
-
-tbody td:first-child {
-  text-align: left;
-  color: var(--ink);
-  font-weight: 500;
-}
-
-.tag-year {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.tag-now {
-  font-size: 9px;
-  padding: 1px 5px;
-  background: var(--gold);
-  color: #fff;
-  border-radius: 3px;
-  letter-spacing: 0.5px;
-}
-
-.tag-next {
-  font-size: 9px;
-  padding: 1px 5px;
-  background: var(--ink);
-  color: #fff;
-  border-radius: 3px;
-  letter-spacing: 0.5px;
-}
-
-.dynamic-pos {
-  color: var(--green) !important;
-  font-weight: 500;
-}
-
-.dynamic-neg {
-  color: var(--red) !important;
-  font-weight: 500;
-}
-
-.dynamic-zero { color: var(--ink3) !important; }
-
-.pct-high { color: var(--red-lt) !important; }
-.pct-low  { color: var(--green-lt) !important; }
-.pct-norm { color: var(--ink2); }
-
-/* ── 护栏说明角标 ── */
-.footnote {
-  padding: 12px 24px;
-  border-top: 1px solid var(--rule);
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--ink3);
-  letter-spacing: 0.5px;
-  background: var(--paper2);
-}
-
-/* ── 模态框 ── */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(26,26,24,0.5);
-  z-index: 200;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(3px);
-}
-
-.modal-overlay.open { display: flex; }
-
-.modal {
-  background: var(--paper);
-  border-radius: 10px;
-  padding: 28px 32px;
-  width: 400px;
-  max-width: 90vw;
-  box-shadow: 0 8px 40px rgba(26,26,24,0.2);
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.modal-title {
-  font-size: 17px;
-  font-weight: 600;
-  font-family: 'Noto Serif SC', serif;
-  color: var(--ink);
-}
-
-.modal-fields { display: flex; flex-direction: column; gap: 14px; }
-
-.modal-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  padding-top: 4px;
-}
-
-/* ── 空状态 ── */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 24px;
-  text-align: center;
-  color: var(--ink3);
-  gap: 12px;
-}
-
-.empty-icon { font-size: 36px; opacity: 0.4; }
-.empty-text { font-size: 14px; font-family: 'Noto Serif SC', serif; }
-.empty-sub  { font-size: 12px; font-family: var(--mono); }
-
-/* ── 动画 ── */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.fade-in { animation: fadeIn 0.3s ease forwards; }
-
-/* ── 滚动条 ── */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--paper3); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--ink3); }
-
-/* tooltip */
-.tip {
-  position: fixed;
-  background: var(--ink);
-  color: var(--paper);
-  padding: 8px 12px;
-  border-radius: var(--radius);
-  font-family: var(--mono);
-  font-size: 11px;
-  pointer-events: none;
-  z-index: 999;
-  display: none;
-  max-width: 220px;
-  line-height: 1.6;
-  box-shadow: var(--shadow);
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>慢慢花 · Paceflow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'> <text y='.9em' font-size='90'>🤑</text></svg>">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Noto+Serif+SC:wght@300;400;600&family=DM+Mono:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1a1a18;
+      --ink2: #3d3d38;
+      --ink3: #7a7a70;
+      --paper: #f5f0e8;
+      --paper2: #ede8dc;
+      --paper3: #e0d9cc;
+      --gold: #b5861a;
+      --gold-lt: #d4a935;
+      --green: #2d6a4f;
+      --green-lt: #40916c;
+      --red: #9b2226;
+      --red-lt: #ae2012;
+      --rule: rgba(26, 26, 24, 0.12);
+      --shadow: 0 2px 16px rgba(26, 26, 24, 0.10);
+      --serif: 'Lora', 'Noto Serif SC', serif;
+      --mono: 'DM Mono', monospace;
+      --radius: 6px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 15px;
+    }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--serif);
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse at 20% 0%, rgba(181, 134, 26, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 100%, rgba(45, 106, 79, 0.05) 0%, transparent 60%);
+    }
+
+    /* ── 顶栏 ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--rule);
+      background: rgba(245, 240, 232, 0.92);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .brand-zh {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: 2px;
+    }
+
+    .brand-en {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--gold);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .brand-dot {
+      color: var(--ink3);
+      font-weight: 300;
+      font-size: 14px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* ── 按钮 ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 16px;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.18s;
+      border: 1px solid transparent;
+      text-transform: uppercase;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border-color: var(--rule);
+      color: var(--ink2);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--ink3);
+      background: var(--paper2);
+    }
+
+    .btn-gold {
+      background: var(--gold);
+      color: #fff;
+      border-color: var(--gold);
+    }
+
+    .btn-gold:hover {
+      background: var(--gold-lt);
+      border-color: var(--gold-lt);
+    }
+
+    .btn-sm {
+      padding: 5px 11px;
+      font-size: 10px;
+    }
+
+    /* ── 方案标签页 ── */
+    .plans-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 32px;
+      border-bottom: 1px solid var(--rule);
+      overflow-x: auto;
+      background: var(--paper2);
+    }
+
+    .plan-tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-family: var(--mono);
+      font-size: 11px;
+      cursor: pointer;
+      white-space: nowrap;
+      border: 1px solid var(--rule);
+      background: transparent;
+      color: var(--ink3);
+      transition: all 0.18s;
+      user-select: none;
+    }
+
+    .plan-tab.active {
+      background: var(--ink);
+      color: var(--paper);
+      border-color: var(--ink);
+    }
+
+    .plan-tab:not(.active):hover {
+      border-color: var(--ink3);
+      color: var(--ink2);
+    }
+
+    .plan-tab .del-btn {
+      font-size: 12px;
+      line-height: 1;
+      opacity: 0.5;
+      padding: 0 2px;
+    }
+
+    .plan-tab .del-btn:hover {
+      opacity: 1;
+      color: var(--red);
+    }
+
+    .add-plan-btn {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-family: var(--mono);
+      font-size: 13px;
+      cursor: pointer;
+      border: 1px dashed var(--rule);
+      background: transparent;
+      color: var(--ink3);
+      transition: all 0.18s;
+      flex-shrink: 0;
+    }
+
+    .add-plan-btn:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    /* ── 主布局 ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      min-height: calc(100vh - 107px);
+    }
+
+    /* ── 侧边参数面板 ── */
+    .sidebar {
+      padding: 28px 24px;
+      border-right: 1px solid var(--rule);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      background: rgba(237, 232, 220, 0.5);
+    }
+
+    .sidebar-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--ink3);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .field-label {
+      font-size: 12px;
+      color: var(--ink2);
+      font-family: 'Noto Serif SC', serif;
+      font-weight: 400;
+    }
+
+    .field-label small {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--ink3);
+      margin-left: 4px;
+    }
+
+    .field-input {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      border: 1px solid var(--rule);
+      border-radius: var(--radius);
+      background: var(--paper);
+      overflow: hidden;
+      transition: border-color 0.18s;
+    }
+
+    .field-input:focus-within {
+      border-color: var(--gold);
+    }
+
+    .field-input input {
+      flex: 1;
+      padding: 8px 10px;
+      border: none;
+      background: transparent;
+      font-family: var(--mono);
+      font-size: 14px;
+      color: var(--ink);
+      outline: none;
+      width: 100%;
+    }
+
+    .field-input .unit {
+      padding: 0 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--ink3);
+      background: var(--paper2);
+      border-left: 1px solid var(--rule);
+      height: 100%;
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    .field-hint {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--ink3);
+      line-height: 1.5;
+    }
+
+    .plan-name-input {
+      width: 100%;
+      padding: 7px 10px;
+      border: 1px solid var(--rule);
+      border-radius: var(--radius);
+      background: var(--paper);
+      font-family: var(--serif);
+      font-size: 13px;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.18s;
+    }
+
+    .plan-name-input:focus {
+      border-color: var(--gold);
+    }
+
+    .guardrail-box {
+      padding: 12px 14px;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: var(--radius);
+      border-left: 3px solid var(--gold);
+    }
+
+    .guardrail-box .gb-title {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .guardrail-box .gb-rule {
+      font-size: 11px;
+      color: var(--ink2);
+      line-height: 1.8;
+      font-family: var(--mono);
+    }
+
+    .sidebar-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* ── 主内容 ── */
+    .main {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── 摘要栏 ── */
+    .summary-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .summary-card {
+      padding: 16px 20px;
+      border-right: 1px solid var(--rule);
+    }
+
+    .summary-card:last-child {
+      border-right: none;
+    }
+
+    .sc-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--ink3);
+      margin-bottom: 6px;
+    }
+
+    .sc-value {
+      font-family: var(--mono);
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .sc-sub {
+      font-size: 11px;
+      color: var(--ink3);
+      margin-top: 4px;
+      font-family: var(--mono);
+    }
+
+    /* ── 图表区 ── */
+    .chart-area {
+      padding: 20px 24px 0;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .chart-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: var(--ink3);
+      text-transform: uppercase;
+    }
+
+    .chart-legend {
+      display: flex;
+      gap: 14px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--ink3);
+    }
+
+    .legend-line {
+      width: 20px;
+      height: 2px;
+      border-radius: 1px;
+    }
+
+    #chartCanvas {
+      width: 100%;
+      display: block;
+    }
+
+    /* ── 表格区 ── */
+    .table-area {
+      flex: 1;
+      overflow: auto;
+      padding: 20px 24px;
+    }
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .table-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: var(--ink3);
+      text-transform: uppercase;
+    }
+
+    table {
+      width: 100%;
+      min-width: 860px;
+      border-collapse: collapse;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    thead th {
+      text-align: right;
+      padding: 8px 10px;
+      font-size: 10px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--ink3);
+      border-bottom: 2px solid var(--rule);
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    thead th:first-child {
+      text-align: left;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--rule);
+      transition: background 0.1s;
+    }
+
+    tbody tr:hover {
+      background: var(--paper2);
+    }
+
+    tbody tr.depleted {
+      background: rgba(155, 34, 38, 0.04);
+    }
+
+    tbody tr.depleted td {
+      color: var(--ink3);
+    }
+
+    tbody tr.cur-year {
+      background: rgba(181, 134, 26, 0.06);
+    }
+
+    tbody td {
+      padding: 9px 10px;
+      text-align: right;
+      color: var(--ink2);
+      white-space: nowrap;
+    }
+
+    tbody td:first-child {
+      text-align: left;
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .tag-year {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .tag-now {
+      font-size: 9px;
+      padding: 1px 5px;
+      background: var(--gold);
+      color: #fff;
+      border-radius: 3px;
+      letter-spacing: 0.5px;
+    }
+
+    .tag-next {
+      font-size: 9px;
+      padding: 1px 5px;
+      background: var(--ink);
+      color: #fff;
+      border-radius: 3px;
+      letter-spacing: 0.5px;
+    }
+
+    .dynamic-pos {
+      color: var(--green) !important;
+      font-weight: 500;
+    }
+
+    .dynamic-neg {
+      color: var(--red) !important;
+      font-weight: 500;
+    }
+
+    .dynamic-zero {
+      color: var(--ink3) !important;
+    }
+
+    .pct-high {
+      color: var(--red-lt) !important;
+    }
+
+    .pct-low {
+      color: var(--green-lt) !important;
+    }
+
+    .pct-norm {
+      color: var(--ink2);
+    }
+
+    /* ── 护栏说明角标 ── */
+    .footnote {
+      padding: 12px 24px;
+      border-top: 1px solid var(--rule);
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--ink3);
+      letter-spacing: 0.5px;
+      background: var(--paper2);
+    }
+
+    /* ── 模态框 ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(26, 26, 24, 0.5);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(3px);
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--paper);
+      border-radius: 10px;
+      padding: 28px 32px;
+      width: 400px;
+      max-width: 90vw;
+      box-shadow: 0 8px 40px rgba(26, 26, 24, 0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 600;
+      font-family: 'Noto Serif SC', serif;
+      color: var(--ink);
+    }
+
+    .modal-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      padding-top: 4px;
+    }
+
+    /* ── 空状态 ── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px;
+      text-align: center;
+      color: var(--ink3);
+      gap: 12px;
+    }
+
+    .empty-icon {
+      font-size: 36px;
+      opacity: 0.4;
+    }
+
+    .empty-text {
+      font-size: 14px;
+      font-family: 'Noto Serif SC', serif;
+    }
+
+    .empty-sub {
+      font-size: 12px;
+      font-family: var(--mono);
+    }
+
+    /* ── 动画 ── */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    /* ── 滚动条 ── */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--paper3);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--ink3);
+    }
+
+    /* tooltip */
+    .tip {
+      position: fixed;
+      background: var(--ink);
+      color: var(--paper);
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 11px;
+      pointer-events: none;
+      z-index: 999;
+      display: none;
+      max-width: 220px;
+      line-height: 1.6;
+      box-shadow: var(--shadow);
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- 顶栏 -->
-<header class="topbar">
-  <div class="brand">
-    <span class="brand-zh">慢慢花</span>
-    <span class="brand-dot">·</span>
-    <span class="brand-en">Paceflow</span>
+  <!-- 顶栏 -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-zh">慢慢花</span>
+      <span class="brand-dot">·</span>
+      <span class="brand-en">Paceflow</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-outline btn-sm" id="btnResim">↺ 重新模拟</button>
+      <button class="btn btn-gold btn-sm" id="btnSave">保存</button>
+    </div>
+  </header>
+
+  <!-- 方案标签页 -->
+  <div class="plans-bar" id="plansBar">
+    <button class="add-plan-btn" id="btnAddPlan">＋ 新方案</button>
   </div>
-  <div class="topbar-right">
-    <button class="btn btn-outline btn-sm" id="btnResim">↺ 重新模拟</button>
-    <button class="btn btn-gold btn-sm" id="btnSave">保存</button>
+
+  <!-- 主布局 -->
+  <div class="layout">
+
+    <!-- 侧边参数 -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="section-label">方案设置</div>
+        <div class="field">
+          <div class="field-label">方案名称</div>
+          <input class="plan-name-input" id="planName" type="text" placeholder="例：乐观预期">
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-label">基础参数</div>
+
+        <div class="field">
+          <div class="field-label">年初资产 <small>锚点，轻易不改</small></div>
+          <div class="field-input">
+            <input type="number" id="startAsset" placeholder="1000000" min="0">
+            <span class="unit">元</span>
+          </div>
+          <div class="field-hint">今年 1月1日 的总可投资资产</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">最新资产 <small>随时更新</small></div>
+          <div class="field-input">
+            <input type="number" id="latestAsset" placeholder="1000000" min="0">
+            <span class="unit">元</span>
+          </div>
+          <div class="field-hint">驱动明年的计算起点</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">预期年化收益率</div>
+          <div class="field-input">
+            <input type="number" id="returnRate" placeholder="5" step="0.1" min="0" max="30">
+            <span class="unit">%</span>
+          </div>
+          <div class="field-hint">填名义收益率（含通胀部分）</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">通胀率</div>
+          <div class="field-input">
+            <input type="number" id="inflationRate" placeholder="3.5" step="0.1" min="0" max="20">
+            <span class="unit">%</span>
+          </div>
+          <div class="field-hint">建议填 3%–5%，越大越谨慎</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">规划年数</div>
+          <div class="field-input">
+            <input type="number" id="planYears" placeholder="30" min="5" max="80" step="1">
+            <span class="unit">年</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-label">护栏参数 <span style="font-size:9px;color:var(--gold);margin-left:4px">固定</span></div>
+        <div class="guardrail-box">
+          <div class="gb-title">动态护栏策略</div>
+          <div class="gb-rule">
+            基准提款率：<strong>4%</strong><br>
+            提款率 &gt; 4.8% → 减少 10%<br>
+            提款率 &lt; 3.2% → 增加 10%<br>
+            否则 → 维持不变
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-actions">
+        <button class="btn btn-gold" id="btnCalc" style="justify-content:center">计算</button>
+      </div>
+    </aside>
+
+    <!-- 主内容 -->
+    <main class="main" id="mainArea">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">🌿</div>
+        <div class="empty-text">填入参数，开始测算你的余生现金流</div>
+        <div class="empty-sub">每一次更新最新资产，未来就会重新呈现</div>
+      </div>
+
+      <!-- 摘要 -->
+      <div class="summary-bar" id="summaryBar" style="display:none">
+        <div class="summary-card">
+          <div class="sc-label">今年可提款</div>
+          <div class="sc-value" id="sc-withdraw">—</div>
+          <div class="sc-sub" id="sc-withdraw-mo">—</div>
+        </div>
+        <div class="summary-card">
+          <div class="sc-label">明年可提款</div>
+          <div class="sc-value" id="sc-next">—</div>
+          <div class="sc-sub" id="sc-next-mo">—</div>
+        </div>
+        <div class="summary-card">
+          <div class="sc-label">30年后资产</div>
+          <div class="sc-value" id="sc-end">—</div>
+          <div class="sc-sub">中位数估算</div>
+        </div>
+        <div class="summary-card">
+          <div class="sc-label">资金可持续</div>
+          <div class="sc-value" id="sc-survive">—</div>
+          <div class="sc-sub" id="sc-survive-sub">—</div>
+        </div>
+      </div>
+
+      <!-- 图表 -->
+      <div class="chart-area" id="chartArea" style="display:none">
+        <div class="chart-header">
+          <div class="chart-title">资产走势模拟</div>
+          <div class="chart-legend">
+            <div class="legend-item">
+              <div class="legend-line" style="background:rgba(45,106,79,0.35);height:6px;border-radius:3px;width:28px">
+              </div>P90 乐观
+            </div>
+            <div class="legend-item">
+              <div class="legend-line" style="background:var(--gold);"></div>P50 中位
+            </div>
+            <div class="legend-item">
+              <div class="legend-line" style="background:rgba(155,34,38,0.5)"></div>P10 悲观
+            </div>
+          </div>
+        </div>
+        <canvas id="chartCanvas" height="160"></canvas>
+      </div>
+
+      <!-- 表格 -->
+      <div class="table-area" id="tableArea" style="display:none">
+        <div class="table-header">
+          <div class="table-title">逐年提款详情</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="text-align:left">年份</th>
+              <th>年初资产（元）</th>
+              <th>上年资产增长率</th>
+              <th>通货膨胀率</th>
+              <th>基础提款率</th>
+              <th>基础提款金额（元）</th>
+              <th>动态提款金额（元）</th>
+              <th>最终提款金额（元）</th>
+              <th>剩余资产（元）</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="footnote" id="footnote" style="display:none">
+        护栏策略参考先锋领航集团动态护栏研究，由 E大（ETF拯救世界）引入中文投资社区并持续优化 · 慢慢花 Paceflow 仅供规划参考，不构成投资建议
+      </div>
+    </main>
   </div>
-</header>
 
-<!-- 方案标签页 -->
-<div class="plans-bar" id="plansBar">
-  <button class="add-plan-btn" id="btnAddPlan">＋ 新方案</button>
-</div>
-
-<!-- 主布局 -->
-<div class="layout">
-
-  <!-- 侧边参数 -->
-  <aside class="sidebar">
-    <div class="sidebar-section">
-      <div class="section-label">方案设置</div>
-      <div class="field">
-        <div class="field-label">方案名称</div>
-        <input class="plan-name-input" id="planName" type="text" placeholder="例：乐观预期">
-      </div>
-    </div>
-
-    <div class="sidebar-section">
-      <div class="section-label">基础参数</div>
-
-      <div class="field">
-        <div class="field-label">年初资产 <small>锚点，轻易不改</small></div>
-        <div class="field-input">
-          <input type="number" id="startAsset" placeholder="1000000" min="0">
-          <span class="unit">元</span>
-        </div>
-        <div class="field-hint">今年 1月1日 的总可投资资产</div>
-      </div>
-
-      <div class="field">
-        <div class="field-label">最新资产 <small>随时更新</small></div>
-        <div class="field-input">
-          <input type="number" id="latestAsset" placeholder="1000000" min="0">
-          <span class="unit">元</span>
-        </div>
-        <div class="field-hint">驱动明年的计算起点</div>
-      </div>
-
-      <div class="field">
-        <div class="field-label">预期年化收益率</div>
-        <div class="field-input">
-          <input type="number" id="returnRate" placeholder="5" step="0.1" min="0" max="30">
-          <span class="unit">%</span>
-        </div>
-        <div class="field-hint">填名义收益率（含通胀部分）</div>
-      </div>
-
-      <div class="field">
-        <div class="field-label">通胀率</div>
-        <div class="field-input">
-          <input type="number" id="inflationRate" placeholder="3.5" step="0.1" min="0" max="20">
-          <span class="unit">%</span>
-        </div>
-        <div class="field-hint">建议填 3%–5%，越大越谨慎</div>
-      </div>
-
-      <div class="field">
-        <div class="field-label">规划年数</div>
-        <div class="field-input">
-          <input type="number" id="planYears" placeholder="30" min="5" max="80" step="1">
-          <span class="unit">年</span>
+  <!-- 新方案弹窗 -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-title">新建方案</div>
+      <div class="modal-fields">
+        <div class="field">
+          <div class="field-label">方案名称</div>
+          <input class="plan-name-input" id="modalPlanName" placeholder="例：谨慎预期">
         </div>
       </div>
-    </div>
-
-    <div class="sidebar-section">
-      <div class="section-label">护栏参数 <span style="font-size:9px;color:var(--gold);margin-left:4px">固定</span></div>
-      <div class="guardrail-box">
-        <div class="gb-title">动态护栏策略</div>
-        <div class="gb-rule">
-          基准提款率：<strong>4%</strong><br>
-          提款率 &gt; 4.8% → 减少 10%<br>
-          提款率 &lt; 3.2% → 增加 10%<br>
-          否则 → 维持不变
-        </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" id="modalCancel">取消</button>
+        <button class="btn btn-gold" id="modalConfirm">创建</button>
       </div>
-    </div>
-
-    <div class="sidebar-actions">
-      <button class="btn btn-gold" id="btnCalc" style="justify-content:center">计算</button>
-    </div>
-  </aside>
-
-  <!-- 主内容 -->
-  <main class="main" id="mainArea">
-    <div class="empty-state" id="emptyState">
-      <div class="empty-icon">🌿</div>
-      <div class="empty-text">填入参数，开始测算你的余生现金流</div>
-      <div class="empty-sub">每一次更新最新资产，未来就会重新呈现</div>
-    </div>
-
-    <!-- 摘要 -->
-    <div class="summary-bar" id="summaryBar" style="display:none">
-      <div class="summary-card">
-        <div class="sc-label">今年可提款</div>
-        <div class="sc-value" id="sc-withdraw">—</div>
-        <div class="sc-sub" id="sc-withdraw-mo">—</div>
-      </div>
-      <div class="summary-card">
-        <div class="sc-label">明年可提款</div>
-        <div class="sc-value" id="sc-next">—</div>
-        <div class="sc-sub" id="sc-next-mo">—</div>
-      </div>
-      <div class="summary-card">
-        <div class="sc-label">30年后资产</div>
-        <div class="sc-value" id="sc-end">—</div>
-        <div class="sc-sub">中位数估算</div>
-      </div>
-      <div class="summary-card">
-        <div class="sc-label">资金可持续</div>
-        <div class="sc-value" id="sc-survive">—</div>
-        <div class="sc-sub" id="sc-survive-sub">—</div>
-      </div>
-    </div>
-
-    <!-- 图表 -->
-    <div class="chart-area" id="chartArea" style="display:none">
-      <div class="chart-header">
-        <div class="chart-title">资产走势模拟</div>
-        <div class="chart-legend">
-          <div class="legend-item"><div class="legend-line" style="background:rgba(45,106,79,0.35);height:6px;border-radius:3px;width:28px"></div>P90 乐观</div>
-          <div class="legend-item"><div class="legend-line" style="background:var(--gold);"></div>P50 中位</div>
-          <div class="legend-item"><div class="legend-line" style="background:rgba(155,34,38,0.5)"></div>P10 悲观</div>
-        </div>
-      </div>
-      <canvas id="chartCanvas" height="160"></canvas>
-    </div>
-
-    <!-- 表格 -->
-    <div class="table-area" id="tableArea" style="display:none">
-      <div class="table-header">
-        <div class="table-title">逐年提款详情</div>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th style="text-align:left">年份</th>
-            <th>年初资产（元）</th>
-            <th>上年资产增长率</th>
-            <th>通货膨胀率</th>
-            <th>基础提款率</th>
-            <th>基础提款金额（元）</th>
-            <th>动态提款金额（元）</th>
-            <th>最终提款金额（元）</th>
-            <th>剩余资产（元）</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-    </div>
-
-    <div class="footnote" id="footnote" style="display:none">
-      护栏策略参考先锋领航集团动态护栏研究，由 E大（ETF拯救世界）引入中文投资社区并持续优化 · 慢慢花 Paceflow 仅供规划参考，不构成投资建议
-    </div>
-  </main>
-</div>
-
-<!-- 新方案弹窗 -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal">
-    <div class="modal-title">新建方案</div>
-    <div class="modal-fields">
-      <div class="field">
-        <div class="field-label">方案名称</div>
-        <input class="plan-name-input" id="modalPlanName" placeholder="例：谨慎预期">
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" id="modalCancel">取消</button>
-      <button class="btn btn-gold" id="modalConfirm">创建</button>
     </div>
   </div>
-</div>
 
-<div class="tip" id="tooltip"></div>
+  <div class="tip" id="tooltip"></div>
 
-<script>
-// ════════════════════════════════════════════════
-// 慢慢花 · Paceflow  —  核心引擎
-// 完全复刻 E大 动态护栏提款算法
-// ════════════════════════════════════════════════
+  <script>
+    // ════════════════════════════════════════════════
+    // 慢慢花 · Paceflow  —  核心引擎
+    // 完全复刻 E大 动态护栏提款算法
+    // ════════════════════════════════════════════════
 
-const STORAGE_KEY = 'paceflow_v1';
-const GUARDRAIL_BASE = 0.04;
-const GUARDRAIL_HIGH = 0.048;   // 4% × 1.2
-const GUARDRAIL_LOW  = 0.032;   // 4% × 0.8
-const GUARDRAIL_ADJ  = 0.10;    // ±10%
-const MC_RUNS        = 500;
+    const STORAGE_KEY = 'paceflow_v1';
+    const GUARDRAIL_BASE = 0.04;
+    const GUARDRAIL_HIGH = 0.048;   // 4% × 1.2
+    const GUARDRAIL_LOW = 0.032;   // 4% × 0.8
+    const GUARDRAIL_ADJ = 0.10;    // ±10%
+    const MC_RUNS = 500;
 
-// ── 状态 ──
-let state = {
-  plans: [],
-  activePlan: 0,
-  seed: Math.floor(Math.random() * 999999),
-};
-
-// ── 本地存储 ──
-function saveState() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
-}
-
-function loadState() {
-  try {
-    const s = localStorage.getItem(STORAGE_KEY);
-    if (s) { state = JSON.parse(s); }
-  } catch(e) {}
-  if (!state.plans || state.plans.length === 0) {
-    state.plans = [defaultPlan('方案一')];
-    state.activePlan = 0;
-  }
-}
-
-function defaultPlan(name) {
-  return {
-    name,
-    startAsset:   1000000,
-    latestAsset:  1000000,
-    returnRate:   5,
-    inflationRate:3.5,
-    planYears:    30,
-  };
-}
-
-// ── 伪随机数（可重现）──
-function seededRandom(seed) {
-  // xorshift32
-  let s = seed >>> 0;
-  return () => {
-    s ^= s << 13; s ^= s >>> 17; s ^= s << 5;
-    return (s >>> 0) / 4294967296;
-  };
-}
-
-function normalFromSeed(rng) {
-  // Box-Muller
-  let u = 0, v = 0;
-  while (u === 0) u = rng();
-  while (v === 0) v = rng();
-  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
-}
-
-// ── 核心：E大算法模拟一条路径 ──
-// sigma 默认用 returnRate * 0.6 作为波动率估算（可调）
-function simulatePath(plan, rng) {
-  const { startAsset, latestAsset, returnRate, inflationRate, planYears } = plan;
-  const mu    = returnRate / 100;
-  const infl  = inflationRate / 100;
-  const sigma = mu * 0.8; // 波动率 = 预期收益的80%（合理近似）
-
-  const rows = [];
-  const currentYear = new Date().getFullYear();
-
-  // ── 第一年（今年）：锚点年 ──
-  // 上年资产增长率：今年是第一年，无上年数据，显示 —
-  const baseWithdraw0 = startAsset * GUARDRAIL_BASE;
-  rows.push({
-    year:            currentYear,
-    startAssets:     startAsset,
-    lastGrowthRate:  null,          // 无上年，显示 —
-    inflRate:        infl,
-    baseRate:        GUARDRAIL_BASE,
-    baseWithdraw:    baseWithdraw0,
-    dynamicAdj:      0,
-    finalWithdraw:   baseWithdraw0,
-    remaining:       startAsset - baseWithdraw0,
-    phase:           'anchor',
-  });
-
-  // ── 第二年（明年）：用 latestAsset 驱动 ──
-  // 上年资产增长率 = (latestAsset - 上年剩余资产) / 上年剩余资产
-  // 上年剩余资产 = 今年年初资产 - 今年最终提款额（即提款后真正用于投资的部分）
-  {
-    const prevFinal      = rows[0].finalWithdraw;
-    const prevRemaining  = rows[0].remaining;   // 今年剩余资产（提款后可投资额）
-    const lastGrowthRate = prevRemaining > 0 ? (latestAsset - prevRemaining) / prevRemaining : null;
-    const base           = prevFinal * (1 + infl);
-    const rate           = latestAsset > 0 ? base / latestAsset : 0;
-    let adj = 0;
-    if (rate > GUARDRAIL_HIGH) adj = -(base * GUARDRAIL_ADJ);
-    else if (rate < GUARDRAIL_LOW) adj = +(base * GUARDRAIL_ADJ);
-    const final = Math.max(0, base + adj);
-    const rem   = Math.max(0, latestAsset - final);
-    rows.push({
-      year:            currentYear + 1,
-      startAssets:     latestAsset,
-      lastGrowthRate,
-      inflRate:        infl,
-      baseRate:        rate,
-      baseWithdraw:    base,
-      dynamicAdj:      adj,
-      finalWithdraw:   final,
-      remaining:       rem,
-      phase:           'latest',
-    });
-  }
-
-  // ── 后续年份：随机模拟 ──
-  for (let i = 2; i < planYears; i++) {
-    const prev = rows[i - 1];
-    if (prev.remaining <= 0) {
-      rows.push({
-        year: currentYear + i,
-        startAssets: 0, lastGrowthRate: null, inflRate: infl,
-        baseRate: 0, baseWithdraw: 0,
-        dynamicAdj: 0, finalWithdraw: 0, remaining: 0,
-        phase: 'depleted',
-      });
-      continue;
-    }
-
-    // 随机收益率（正态分布）= 上年资产增长率
-    const r      = mu + sigma * normalFromSeed(rng);
-    const startA = prev.remaining * (1 + r);
-    const base   = prev.finalWithdraw * (1 + infl);
-    const rate   = startA > 0 ? base / startA : 999;
-    let adj = 0;
-    if (rate > GUARDRAIL_HIGH) adj = -(base * GUARDRAIL_ADJ);
-    else if (rate < GUARDRAIL_LOW) adj = +(base * GUARDRAIL_ADJ);
-    const final = Math.max(0, base + adj);
-    const rem   = Math.max(0, startA - final);
-
-    rows.push({
-      year:            currentYear + i,
-      startAssets:     startA,
-      lastGrowthRate:  r,           // 本年实际模拟收益率即为"上年资产增长率"
-      inflRate:        infl,
-      baseRate:        rate,
-      baseWithdraw:    base,
-      dynamicAdj:      adj,
-      finalWithdraw:   final,
-      remaining:       rem,
-      phase:           rem <= 0 ? 'depleted' : 'sim',
-    });
-  }
-
-  return rows;
-}
-
-// ── 蒙特卡洛：生成 P10/P50/P90 ──
-function runMC(plan, seed) {
-  const rngMaster = seededRandom(seed);
-  const finalAssets = [];
-  const paths = [];
-
-  for (let s = 0; s < MC_RUNS; s++) {
-    const rng = seededRandom((rngMaster() * 1e9) >>> 0);
-    const rows = simulatePath(plan, rng);
-    finalAssets.push(rows[rows.length - 1].remaining);
-    if (s < 60) paths.push(rows.map(r => r.remaining));
-  }
-
-  finalAssets.sort((a, b) => a - b);
-  const p10 = finalAssets[Math.floor(MC_RUNS * 0.1)];
-  const p50 = finalAssets[Math.floor(MC_RUNS * 0.5)];
-  const p90 = finalAssets[Math.floor(MC_RUNS * 0.9)];
-  const successRate = finalAssets.filter(v => v > 0).length / MC_RUNS;
-
-  return { p10, p50, p90, successRate, paths };
-}
-
-// ── 主路径（固定种子）──
-function getMainPath(plan) {
-  const rng = seededRandom(state.seed);
-  return simulatePath(plan, rng);
-}
-
-// ── 格式化 ──
-function fmtMoney(v, digits = 0) {
-  if (v === undefined || v === null || isNaN(v)) return '—';
-  if (Math.abs(v) >= 1e8) return (v / 1e8).toFixed(1) + ' 亿';
-  if (Math.abs(v) >= 10000) return (v / 10000).toFixed(digits === 0 ? 1 : digits) + ' 万';
-  return v.toFixed(0) + ' 元';
-}
-
-function fmtPct(v) {
-  if (isNaN(v) || !isFinite(v)) return '—';
-  return (v * 100).toFixed(2) + '%';
-}
-
-// ── 读取当前方案参数 ──
-function readForm() {
-  return {
-    name:          document.getElementById('planName').value.trim() || '未命名',
-    startAsset:    parseFloat(document.getElementById('startAsset').value)   || 0,
-    latestAsset:   parseFloat(document.getElementById('latestAsset').value)  || 0,
-    returnRate:    parseFloat(document.getElementById('returnRate').value)    || 6,
-    inflationRate: parseFloat(document.getElementById('inflationRate').value) || 3,
-    planYears:     parseInt(document.getElementById('planYears').value)       || 30,
-  };
-}
-
-function fillForm(plan) {
-  document.getElementById('planName').value         = plan.name || '';
-  document.getElementById('startAsset').value       = plan.startAsset || '';
-  document.getElementById('latestAsset').value      = plan.latestAsset || '';
-  document.getElementById('returnRate').value       = plan.returnRate ?? 6;
-  document.getElementById('inflationRate').value    = plan.inflationRate ?? 3;
-  document.getElementById('planYears').value        = plan.planYears ?? 30;
-}
-
-// ── 渲染方案标签页 ──
-function renderPlanTabs() {
-  const bar = document.getElementById('plansBar');
-  bar.innerHTML = '';
-
-  state.plans.forEach((p, i) => {
-    const tab = document.createElement('div');
-    tab.className = 'plan-tab' + (i === state.activePlan ? ' active' : '');
-    tab.innerHTML = `<span>${p.name}</span>${state.plans.length > 1 ? `<span class="del-btn" data-idx="${i}">×</span>` : ''}`;
-    tab.addEventListener('click', (e) => {
-      if (e.target.classList.contains('del-btn')) {
-        if (state.plans.length <= 1) return;
-        state.plans.splice(i, 1);
-        state.activePlan = Math.min(state.activePlan, state.plans.length - 1);
-        renderPlanTabs();
-        fillForm(state.plans[state.activePlan]);
-        calculate();
-        return;
-      }
-      state.activePlan = i;
-      renderPlanTabs();
-      fillForm(p);
-      calculate();
-    });
-    bar.appendChild(tab);
-  });
-
-  const addBtn = document.createElement('button');
-  addBtn.className = 'add-plan-btn';
-  addBtn.textContent = '＋ 新方案';
-  addBtn.addEventListener('click', () => {
-    if (state.plans.length >= 10) { alert('最多支持 10 个方案'); return; }
-    document.getElementById('modalPlanName').value = `方案${state.plans.length + 1}`;
-    document.getElementById('modalOverlay').classList.add('open');
-  });
-  bar.appendChild(addBtn);
-}
-
-// ── 渲染图表 ──
-function renderChart(mc, planYears) {
-  const canvas = document.getElementById('chartCanvas');
-  const W = canvas.parentElement.clientWidth - 48;
-  const H = 160;
-  canvas.width  = W * devicePixelRatio;
-  canvas.height = H * devicePixelRatio;
-  canvas.style.width  = W + 'px';
-  canvas.style.height = H + 'px';
-  const ctx = canvas.getContext('2d');
-  ctx.scale(devicePixelRatio, devicePixelRatio);
-  ctx.clearRect(0, 0, W, H);
-
-  const pad = { t: 10, b: 28, l: 60, r: 16 };
-  const cW = W - pad.l - pad.r;
-  const cH = H - pad.t - pad.b;
-
-  // 找最大值
-  let maxV = 0;
-  mc.paths.forEach(p => p.forEach(v => { if (v > maxV) maxV = v; }));
-  if (maxV === 0) return;
-
-  const xS = (i) => pad.l + (i / (planYears - 1)) * cW;
-  const yS = (v) => pad.t + cH - (v / maxV) * cH;
-
-  // 绘制路径（淡色）
-  mc.paths.forEach(path => {
-    ctx.beginPath();
-    ctx.strokeStyle = 'rgba(181,134,26,0.07)';
-    ctx.lineWidth = 1;
-    path.forEach((v, i) => i === 0 ? ctx.moveTo(xS(i), yS(v)) : ctx.lineTo(xS(i), yS(v)));
-    ctx.stroke();
-  });
-
-  // 计算 P10/P50/P90 逐年
-  const perYear = Array.from({ length: planYears }, (_, yi) => {
-    const vals = mc.paths.map(p => p[yi] ?? 0).sort((a, b) => a - b);
-    return {
-      p10: vals[Math.floor(vals.length * 0.1)],
-      p50: vals[Math.floor(vals.length * 0.5)],
-      p90: vals[Math.floor(vals.length * 0.9)],
+    // ── 状态 ──
+    let state = {
+      plans: [],
+      activePlan: 0,
+      seed: Math.floor(Math.random() * 999999),
     };
-  });
 
-  // P90 面积
-  ctx.beginPath();
-  perYear.forEach(({ p90 }, i) => i === 0 ? ctx.moveTo(xS(i), yS(p90)) : ctx.lineTo(xS(i), yS(p90)));
-  perYear.slice().reverse().forEach(({ p10 }, i) => {
-    const ri = planYears - 1 - i;
-    i === 0 ? ctx.lineTo(xS(ri), yS(p10)) : ctx.lineTo(xS(ri), yS(p10));
-  });
-  ctx.closePath();
-  ctx.fillStyle = 'rgba(45,106,79,0.10)';
-  ctx.fill();
-
-  // P10 线
-  ctx.beginPath();
-  perYear.forEach(({ p10 }, i) => i === 0 ? ctx.moveTo(xS(i), yS(p10)) : ctx.lineTo(xS(i), yS(p10)));
-  ctx.strokeStyle = 'rgba(155,34,38,0.45)';
-  ctx.lineWidth = 1.5;
-  ctx.setLineDash([4, 3]);
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  // P90 线
-  ctx.beginPath();
-  perYear.forEach(({ p90 }, i) => i === 0 ? ctx.moveTo(xS(i), yS(p90)) : ctx.lineTo(xS(i), yS(p90)));
-  ctx.strokeStyle = 'rgba(45,106,79,0.50)';
-  ctx.lineWidth = 1.5;
-  ctx.setLineDash([4, 3]);
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  // P50 线（主线）
-  ctx.beginPath();
-  perYear.forEach(({ p50 }, i) => i === 0 ? ctx.moveTo(xS(i), yS(p50)) : ctx.lineTo(xS(i), yS(p50)));
-  ctx.strokeStyle = 'var(--gold)';
-  ctx.lineWidth = 2.5;
-  ctx.stroke();
-
-  // 零线
-  ctx.beginPath();
-  ctx.moveTo(pad.l, yS(0)); ctx.lineTo(pad.l + cW, yS(0));
-  ctx.strokeStyle = 'rgba(26,26,24,0.1)';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
-  // Y轴标签
-  ctx.fillStyle = 'rgba(26,26,24,0.35)';
-  ctx.font = `10px 'DM Mono', monospace`;
-  ctx.textAlign = 'right';
-  [0, 0.25, 0.5, 0.75, 1].forEach(t => {
-    const v = maxV * t;
-    const y = yS(v);
-    ctx.fillText(fmtMoney(v, 1), pad.l - 6, y + 4);
-  });
-
-  // X轴标签
-  ctx.textAlign = 'center';
-  const curYear = new Date().getFullYear();
-  [0, Math.floor(planYears / 3), Math.floor(planYears * 2 / 3), planYears - 1].forEach(i => {
-    ctx.fillText(curYear + i, xS(i), H - pad.b + 14);
-  });
-}
-
-// ── 渲染表格 ──
-function renderTable(rows) {
-  const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = '';
-
-  const dash = '—';
-  const dep  = (html) => `<span style="color:var(--ink3)">${html}</span>`;
-
-  rows.forEach((row) => {
-    const tr = document.createElement('tr');
-    if (row.phase === 'depleted') tr.classList.add('depleted');
-    if (row.phase === 'anchor')   tr.classList.add('cur-year');
-
-    const isDep = row.phase === 'depleted';
-
-    // 年份标签
-    let yearLabel = `<span class="tag-year">${row.year}`;
-    if (row.phase === 'anchor') yearLabel += ` <span class="tag-now">今年</span>`;
-    if (row.phase === 'latest') yearLabel += ` <span class="tag-next">明年</span>`;
-    yearLabel += `</span>`;
-
-    // 上年资产增长率
-    let growthCell;
-    if (isDep) {
-      growthCell = dep(dash);
-    } else if (row.lastGrowthRate === null) {
-      growthCell = `<span style="color:var(--ink3)">${dash}</span>`;
-    } else {
-      const gPct = (row.lastGrowthRate * 100).toFixed(2) + '%';
-      const gColor = row.lastGrowthRate >= 0 ? 'var(--green)' : 'var(--red)';
-      growthCell = `<span style="color:${gColor}">${row.lastGrowthRate >= 0 ? '+' : ''}${gPct}</span>`;
+    // ── 本地存储 ──
+    function saveState() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { }
     }
 
-    // 通货膨胀率（每行固定显示，今年也显示）
-    const inflCell = isDep ? dep(dash)
-      : `<span style="color:var(--ink3)">${(row.inflRate * 100).toFixed(1)}%</span>`;
-
-    // 基础提款率（护栏颜色）
-    const rateClass = row.baseRate > GUARDRAIL_HIGH ? 'pct-high'
-                    : row.baseRate < GUARDRAIL_LOW  ? 'pct-low' : 'pct-norm';
-    const rateCell = isDep ? dep(dash)
-      : `<span class="${rateClass}">${fmtPct(row.baseRate)}</span>`;
-
-    // 动态提款金额（正负着色）
-    let dynCell;
-    if (isDep) {
-      dynCell = dep(dash);
-    } else if (row.dynamicAdj === 0) {
-      dynCell = `<span class="dynamic-zero">${dash}</span>`;
-    } else {
-      const sign = row.dynamicAdj > 0 ? '+' : '';
-      const cls  = row.dynamicAdj > 0 ? 'dynamic-pos' : 'dynamic-neg';
-      dynCell = `<span class="${cls}">${sign}${fmtMoney(row.dynamicAdj)}</span>`;
+    function loadState() {
+      try {
+        const s = localStorage.getItem(STORAGE_KEY);
+        if (s) { state = JSON.parse(s); }
+      } catch (e) { }
+      if (!state.plans || state.plans.length === 0) {
+        state.plans = [defaultPlan('方案一')];
+        state.activePlan = 0;
+      }
     }
 
-    tr.innerHTML = `
+    function defaultPlan(name) {
+      return {
+        name,
+        startAsset: 1000000,
+        latestAsset: 1000000,
+        returnRate: 5,
+        inflationRate: 3.5,
+        planYears: 30,
+      };
+    }
+
+    // ── 伪随机数（可重现）──
+    function seededRandom(seed) {
+      // xorshift32
+      let s = seed >>> 0;
+      return () => {
+        s ^= s << 13; s ^= s >>> 17; s ^= s << 5;
+        return (s >>> 0) / 4294967296;
+      };
+    }
+
+    function normalFromSeed(rng) {
+      // Box-Muller
+      let u = 0, v = 0;
+      while (u === 0) u = rng();
+      while (v === 0) v = rng();
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    }
+
+    // ── 核心：E大算法模拟一条路径 ──
+    // sigma 默认用 returnRate * 0.6 作为波动率估算（可调）
+    function simulatePath(plan, rng) {
+      const { startAsset, latestAsset, returnRate, inflationRate, planYears } = plan;
+      const mu = returnRate / 100;
+      const infl = inflationRate / 100;
+      const sigma = mu * 0.8; // 波动率 = 预期收益的80%（合理近似）
+
+      const rows = [];
+      const currentYear = new Date().getFullYear();
+
+      // ── 第一年（今年）：锚点年 ──
+      // 上年资产增长率：今年是第一年，无上年数据，显示 —
+      const baseWithdraw0 = startAsset * GUARDRAIL_BASE;
+      rows.push({
+        year: currentYear,
+        startAssets: startAsset,
+        lastGrowthRate: null,          // 无上年，显示 —
+        inflRate: infl,
+        baseRate: GUARDRAIL_BASE,
+        baseWithdraw: baseWithdraw0,
+        dynamicAdj: 0,
+        finalWithdraw: baseWithdraw0,
+        remaining: startAsset - baseWithdraw0,
+        phase: 'anchor',
+      });
+
+      // ── 第二年（明年）：用 latestAsset 驱动 ──
+      // 上年资产增长率 = (latestAsset - 上年剩余资产) / 上年剩余资产
+      // 上年剩余资产 = 今年年初资产 - 今年最终提款额（即提款后真正用于投资的部分）
+      {
+        const prevFinal = rows[0].finalWithdraw;
+        const prevRemaining = rows[0].remaining;   // 今年剩余资产（提款后可投资额）
+        const lastGrowthRate = prevRemaining > 0 ? (latestAsset - prevRemaining) / prevRemaining : null;
+        const base = prevFinal * (1 + infl);
+        const rate = latestAsset > 0 ? base / latestAsset : 0;
+        let adj = 0;
+        if (rate > GUARDRAIL_HIGH) adj = -(base * GUARDRAIL_ADJ);
+        else if (rate < GUARDRAIL_LOW) adj = +(base * GUARDRAIL_ADJ);
+        const final = Math.max(0, base + adj);
+        const rem = Math.max(0, latestAsset - final);
+        rows.push({
+          year: currentYear + 1,
+          startAssets: latestAsset,
+          lastGrowthRate,
+          inflRate: infl,
+          baseRate: rate,
+          baseWithdraw: base,
+          dynamicAdj: adj,
+          finalWithdraw: final,
+          remaining: rem,
+          phase: 'latest',
+        });
+      }
+
+      // ── 后续年份：随机模拟 ──
+      for (let i = 2; i < planYears; i++) {
+        const prev = rows[i - 1];
+        if (prev.remaining <= 0) {
+          rows.push({
+            year: currentYear + i,
+            startAssets: 0, lastGrowthRate: null, inflRate: infl,
+            baseRate: 0, baseWithdraw: 0,
+            dynamicAdj: 0, finalWithdraw: 0, remaining: 0,
+            phase: 'depleted',
+          });
+          continue;
+        }
+
+        // 随机收益率（正态分布）= 上年资产增长率
+        const r = mu + sigma * normalFromSeed(rng);
+        const startA = prev.remaining * (1 + r);
+        const base = prev.finalWithdraw * (1 + infl);
+        const rate = startA > 0 ? base / startA : 999;
+        let adj = 0;
+        if (rate > GUARDRAIL_HIGH) adj = -(base * GUARDRAIL_ADJ);
+        else if (rate < GUARDRAIL_LOW) adj = +(base * GUARDRAIL_ADJ);
+        const final = Math.max(0, base + adj);
+        const rem = Math.max(0, startA - final);
+
+        rows.push({
+          year: currentYear + i,
+          startAssets: startA,
+          lastGrowthRate: r,           // 本年实际模拟收益率即为"上年资产增长率"
+          inflRate: infl,
+          baseRate: rate,
+          baseWithdraw: base,
+          dynamicAdj: adj,
+          finalWithdraw: final,
+          remaining: rem,
+          phase: rem <= 0 ? 'depleted' : 'sim',
+        });
+      }
+
+      return rows;
+    }
+
+    // ── 蒙特卡洛：生成 P10/P50/P90 ──
+    function runMC(plan, seed) {
+      const rngMaster = seededRandom(seed);
+      const finalAssets = [];
+      const paths = [];
+
+      for (let s = 0; s < MC_RUNS; s++) {
+        const rng = seededRandom((rngMaster() * 1e9) >>> 0);
+        const rows = simulatePath(plan, rng);
+        finalAssets.push(rows[rows.length - 1].remaining);
+        if (s < 60) paths.push(rows.map(r => r.remaining));
+      }
+
+      finalAssets.sort((a, b) => a - b);
+      const p10 = finalAssets[Math.floor(MC_RUNS * 0.1)];
+      const p50 = finalAssets[Math.floor(MC_RUNS * 0.5)];
+      const p90 = finalAssets[Math.floor(MC_RUNS * 0.9)];
+      const successRate = finalAssets.filter(v => v > 0).length / MC_RUNS;
+
+      return { p10, p50, p90, successRate, paths };
+    }
+
+    // ── 主路径（固定种子）──
+    function getMainPath(plan) {
+      const rng = seededRandom(state.seed);
+      return simulatePath(plan, rng);
+    }
+
+    // ── 格式化 ──
+    function fmtMoney(v, digits = 0) {
+      if (v === undefined || v === null || isNaN(v)) return '—';
+      if (Math.abs(v) >= 1e8) return (v / 1e8).toFixed(1) + ' 亿';
+      if (Math.abs(v) >= 10000) return (v / 10000).toFixed(digits === 0 ? 1 : digits) + ' 万';
+      return v.toFixed(0) + ' 元';
+    }
+
+    function fmtPct(v) {
+      if (isNaN(v) || !isFinite(v)) return '—';
+      return (v * 100).toFixed(2) + '%';
+    }
+
+    // ── 读取当前方案参数 ──
+    function readForm() {
+      return {
+        name: document.getElementById('planName').value.trim() || '未命名',
+        startAsset: parseFloat(document.getElementById('startAsset').value) || 0,
+        latestAsset: parseFloat(document.getElementById('latestAsset').value) || 0,
+        returnRate: parseFloat(document.getElementById('returnRate').value) || 6,
+        inflationRate: parseFloat(document.getElementById('inflationRate').value) || 3,
+        planYears: parseInt(document.getElementById('planYears').value) || 30,
+      };
+    }
+
+    function fillForm(plan) {
+      document.getElementById('planName').value = plan.name || '';
+      document.getElementById('startAsset').value = plan.startAsset || '';
+      document.getElementById('latestAsset').value = plan.latestAsset || '';
+      document.getElementById('returnRate').value = plan.returnRate ?? 6;
+      document.getElementById('inflationRate').value = plan.inflationRate ?? 3;
+      document.getElementById('planYears').value = plan.planYears ?? 30;
+    }
+
+    // ── 渲染方案标签页 ──
+    function renderPlanTabs() {
+      const bar = document.getElementById('plansBar');
+      bar.innerHTML = '';
+
+      state.plans.forEach((p, i) => {
+        const tab = document.createElement('div');
+        tab.className = 'plan-tab' + (i === state.activePlan ? ' active' : '');
+        tab.innerHTML = `<span>${p.name}</span>${state.plans.length > 1 ? `<span class="del-btn" data-idx="${i}">×</span>` : ''}`;
+        tab.addEventListener('click', (e) => {
+          if (e.target.classList.contains('del-btn')) {
+            if (state.plans.length <= 1) return;
+            state.plans.splice(i, 1);
+            state.activePlan = Math.min(state.activePlan, state.plans.length - 1);
+            renderPlanTabs();
+            fillForm(state.plans[state.activePlan]);
+            calculate();
+            return;
+          }
+          state.activePlan = i;
+          renderPlanTabs();
+          fillForm(p);
+          calculate();
+        });
+        bar.appendChild(tab);
+      });
+
+      const addBtn = document.createElement('button');
+      addBtn.className = 'add-plan-btn';
+      addBtn.textContent = '＋ 新方案';
+      addBtn.addEventListener('click', () => {
+        if (state.plans.length >= 10) { alert('最多支持 10 个方案'); return; }
+        document.getElementById('modalPlanName').value = `方案${state.plans.length + 1}`;
+        document.getElementById('modalOverlay').classList.add('open');
+      });
+      bar.appendChild(addBtn);
+    }
+
+    // ── 渲染图表 ──
+    function renderChart(mc, planYears) {
+      const canvas = document.getElementById('chartCanvas');
+      const W = canvas.parentElement.clientWidth - 48;
+      const H = 160;
+      canvas.width = W * devicePixelRatio;
+      canvas.height = H * devicePixelRatio;
+      canvas.style.width = W + 'px';
+      canvas.style.height = H + 'px';
+      const ctx = canvas.getContext('2d');
+      ctx.scale(devicePixelRatio, devicePixelRatio);
+      ctx.clearRect(0, 0, W, H);
+
+      const pad = { t: 10, b: 28, l: 60, r: 16 };
+      const cW = W - pad.l - pad.r;
+      const cH = H - pad.t - pad.b;
+
+      // 找最大值
+      let maxV = 0;
+      mc.paths.forEach(p => p.forEach(v => { if (v > maxV) maxV = v; }));
+      if (maxV === 0) return;
+
+      const xS = (i) => pad.l + (i / (planYears - 1)) * cW;
+      const yS = (v) => pad.t + cH - (v / maxV) * cH;
+
+      // 绘制路径（淡色）
+      mc.paths.forEach(path => {
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(181,134,26,0.07)';
+        ctx.lineWidth = 1;
+        path.forEach((v, i) => i === 0 ? ctx.moveTo(xS(i), yS(v)) : ctx.lineTo(xS(i), yS(v)));
+        ctx.stroke();
+      });
+
+      // 计算 P10/P50/P90 逐年
+      const perYear = Array.from({ length: planYears }, (_, yi) => {
+        const vals = mc.paths.map(p => p[yi] ?? 0).sort((a, b) => a - b);
+        return {
+          p10: vals[Math.floor(vals.length * 0.1)],
+          p50: vals[Math.floor(vals.length * 0.5)],
+          p90: vals[Math.floor(vals.length * 0.9)],
+        };
+      });
+
+      // P90 面积
+      ctx.beginPath();
+      perYear.forEach(({ p90 }, i) => i === 0 ? ctx.moveTo(xS(i), yS(p90)) : ctx.lineTo(xS(i), yS(p90)));
+      perYear.slice().reverse().forEach(({ p10 }, i) => {
+        const ri = planYears - 1 - i;
+        i === 0 ? ctx.lineTo(xS(ri), yS(p10)) : ctx.lineTo(xS(ri), yS(p10));
+      });
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(45,106,79,0.10)';
+      ctx.fill();
+
+      // P10 线
+      ctx.beginPath();
+      perYear.forEach(({ p10 }, i) => i === 0 ? ctx.moveTo(xS(i), yS(p10)) : ctx.lineTo(xS(i), yS(p10)));
+      ctx.strokeStyle = 'rgba(155,34,38,0.45)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 3]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // P90 线
+      ctx.beginPath();
+      perYear.forEach(({ p90 }, i) => i === 0 ? ctx.moveTo(xS(i), yS(p90)) : ctx.lineTo(xS(i), yS(p90)));
+      ctx.strokeStyle = 'rgba(45,106,79,0.50)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 3]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // P50 线（主线）
+      ctx.beginPath();
+      perYear.forEach(({ p50 }, i) => i === 0 ? ctx.moveTo(xS(i), yS(p50)) : ctx.lineTo(xS(i), yS(p50)));
+      ctx.strokeStyle = 'var(--gold)';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      // 零线
+      ctx.beginPath();
+      ctx.moveTo(pad.l, yS(0)); ctx.lineTo(pad.l + cW, yS(0));
+      ctx.strokeStyle = 'rgba(26,26,24,0.1)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Y轴标签
+      ctx.fillStyle = 'rgba(26,26,24,0.35)';
+      ctx.font = `10px 'DM Mono', monospace`;
+      ctx.textAlign = 'right';
+      [0, 0.25, 0.5, 0.75, 1].forEach(t => {
+        const v = maxV * t;
+        const y = yS(v);
+        ctx.fillText(fmtMoney(v, 1), pad.l - 6, y + 4);
+      });
+
+      // X轴标签
+      ctx.textAlign = 'center';
+      const curYear = new Date().getFullYear();
+      [0, Math.floor(planYears / 3), Math.floor(planYears * 2 / 3), planYears - 1].forEach(i => {
+        ctx.fillText(curYear + i, xS(i), H - pad.b + 14);
+      });
+    }
+
+    // ── 渲染表格 ──
+    function renderTable(rows) {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+
+      const dash = '—';
+      const dep = (html) => `<span style="color:var(--ink3)">${html}</span>`;
+
+      rows.forEach((row) => {
+        const tr = document.createElement('tr');
+        if (row.phase === 'depleted') tr.classList.add('depleted');
+        if (row.phase === 'anchor') tr.classList.add('cur-year');
+
+        const isDep = row.phase === 'depleted';
+
+        // 年份标签
+        let yearLabel = `<span class="tag-year">${row.year}`;
+        if (row.phase === 'anchor') yearLabel += ` <span class="tag-now">今年</span>`;
+        if (row.phase === 'latest') yearLabel += ` <span class="tag-next">明年</span>`;
+        yearLabel += `</span>`;
+
+        // 上年资产增长率
+        let growthCell;
+        if (isDep) {
+          growthCell = dep(dash);
+        } else if (row.lastGrowthRate === null) {
+          growthCell = `<span style="color:var(--ink3)">${dash}</span>`;
+        } else {
+          const gPct = (row.lastGrowthRate * 100).toFixed(2) + '%';
+          const gColor = row.lastGrowthRate >= 0 ? 'var(--green)' : 'var(--red)';
+          growthCell = `<span style="color:${gColor}">${row.lastGrowthRate >= 0 ? '+' : ''}${gPct}</span>`;
+        }
+
+        // 通货膨胀率（每行固定显示，今年也显示）
+        const inflCell = isDep ? dep(dash)
+          : `<span style="color:var(--ink3)">${(row.inflRate * 100).toFixed(1)}%</span>`;
+
+        // 基础提款率（护栏颜色）
+        const rateClass = row.baseRate > GUARDRAIL_HIGH ? 'pct-high'
+          : row.baseRate < GUARDRAIL_LOW ? 'pct-low' : 'pct-norm';
+        const rateCell = isDep ? dep(dash)
+          : `<span class="${rateClass}">${fmtPct(row.baseRate)}</span>`;
+
+        // 动态提款金额（正负着色）
+        let dynCell;
+        if (isDep) {
+          dynCell = dep(dash);
+        } else if (row.dynamicAdj === 0) {
+          dynCell = `<span class="dynamic-zero">${dash}</span>`;
+        } else {
+          const sign = row.dynamicAdj > 0 ? '+' : '';
+          const cls = row.dynamicAdj > 0 ? 'dynamic-pos' : 'dynamic-neg';
+          dynCell = `<span class="${cls}">${sign}${fmtMoney(row.dynamicAdj)}</span>`;
+        }
+
+        tr.innerHTML = `
       <td>${yearLabel}</td>
       <td>${isDep ? dep('已耗尽') : fmtMoney(row.startAssets)}</td>
       <td>${growthCell}</td>
@@ -1233,119 +1357,120 @@ function renderTable(rows) {
       <td style="color:var(--ink);font-weight:500">${isDep ? dep(dash) : fmtMoney(row.finalWithdraw)}</td>
       <td>${isDep ? dep(dash) : fmtMoney(row.remaining)}</td>
     `;
-    tbody.appendChild(tr);
-  });
-}
+        tbody.appendChild(tr);
+      });
+    }
 
-// ── 主计算函数 ──
-function calculate() {
-  const plan = readForm();
-  if (!plan.startAsset || !plan.latestAsset) return;
+    // ── 主计算函数 ──
+    function calculate() {
+      const plan = readForm();
+      if (!plan.startAsset || !plan.latestAsset) return;
 
-  // 更新当前方案数据
-  state.plans[state.activePlan] = plan;
+      // 更新当前方案数据
+      state.plans[state.activePlan] = plan;
 
-  // 主路径（固定种子）
-  const mainRows = getMainPath(plan);
+      // 主路径（固定种子）
+      const mainRows = getMainPath(plan);
 
-  // 蒙特卡洛
-  const mc = runMC(plan, state.seed);
+      // 蒙特卡洛
+      const mc = runMC(plan, state.seed);
 
-  // 摘要数据
-  const row0 = mainRows[0]; // 今年
-  const row1 = mainRows[1]; // 明年
-  const lastRow = mainRows[mainRows.length - 1];
+      // 摘要数据
+      const row0 = mainRows[0]; // 今年
+      const row1 = mainRows[1]; // 明年
+      const lastRow = mainRows[mainRows.length - 1];
 
-  document.getElementById('sc-withdraw').textContent = fmtMoney(row0.finalWithdraw);
-  document.getElementById('sc-withdraw-mo').textContent = `月均 ${fmtMoney(row0.finalWithdraw / 12)}`;
-  document.getElementById('sc-next').textContent = fmtMoney(row1.finalWithdraw);
-  document.getElementById('sc-next-mo').textContent = `月均 ${fmtMoney(row1.finalWithdraw / 12)}`;
-  document.getElementById('sc-end').textContent = fmtMoney(mc.p50);
-  const pct = Math.round(mc.successRate * 100);
-  document.getElementById('sc-survive').textContent = pct + '%';
-  document.getElementById('sc-survive-sub').textContent =
-    pct >= 90 ? '极为稳健' : pct >= 75 ? '较为安全' : pct >= 60 ? '需要关注' : '建议调整参数';
-  document.getElementById('sc-survive').style.color =
-    pct >= 90 ? 'var(--green)' : pct >= 75 ? 'var(--gold)' : 'var(--red)';
+      document.getElementById('sc-withdraw').textContent = fmtMoney(row0.finalWithdraw);
+      document.getElementById('sc-withdraw-mo').textContent = `月均 ${fmtMoney(row0.finalWithdraw / 12)}`;
+      document.getElementById('sc-next').textContent = fmtMoney(row1.finalWithdraw);
+      document.getElementById('sc-next-mo').textContent = `月均 ${fmtMoney(row1.finalWithdraw / 12)}`;
+      document.getElementById('sc-end').textContent = fmtMoney(mc.p50);
+      const pct = Math.round(mc.successRate * 100);
+      document.getElementById('sc-survive').textContent = pct + '%';
+      document.getElementById('sc-survive-sub').textContent =
+        pct >= 90 ? '极为稳健' : pct >= 75 ? '较为安全' : pct >= 60 ? '需要关注' : '建议调整参数';
+      document.getElementById('sc-survive').style.color =
+        pct >= 90 ? 'var(--green)' : pct >= 75 ? 'var(--gold)' : 'var(--red)';
 
-  // 显示区域
-  document.getElementById('emptyState').style.display  = 'none';
-  document.getElementById('summaryBar').style.display  = 'grid';
-  document.getElementById('chartArea').style.display   = 'block';
-  document.getElementById('tableArea').style.display   = 'block';
-  document.getElementById('footnote').style.display    = 'block';
+      // 显示区域
+      document.getElementById('emptyState').style.display = 'none';
+      document.getElementById('summaryBar').style.display = 'grid';
+      document.getElementById('chartArea').style.display = 'block';
+      document.getElementById('tableArea').style.display = 'block';
+      document.getElementById('footnote').style.display = 'block';
 
-  // 渲染图表和表格
-  renderChart(mc, plan.planYears);
-  renderTable(mainRows);
-}
+      // 渲染图表和表格
+      renderChart(mc, plan.planYears);
+      renderTable(mainRows);
+    }
 
-// ── 事件绑定 ──
-document.getElementById('btnCalc').addEventListener('click', () => {
-  calculate();
-  saveState();
-  renderPlanTabs();
-});
+    // ── 事件绑定 ──
+    document.getElementById('btnCalc').addEventListener('click', () => {
+      calculate();
+      saveState();
+      renderPlanTabs();
+    });
 
-document.getElementById('btnSave').addEventListener('click', () => {
-  const plan = readForm();
-  state.plans[state.activePlan] = plan;
-  saveState();
-  renderPlanTabs();
-  // 视觉反馈
-  const btn = document.getElementById('btnSave');
-  btn.textContent = '已保存 ✓';
-  setTimeout(() => btn.textContent = '保存', 1500);
-});
+    document.getElementById('btnSave').addEventListener('click', () => {
+      const plan = readForm();
+      state.plans[state.activePlan] = plan;
+      saveState();
+      renderPlanTabs();
+      // 视觉反馈
+      const btn = document.getElementById('btnSave');
+      btn.textContent = '已保存 ✓';
+      setTimeout(() => btn.textContent = '保存', 1500);
+    });
 
-document.getElementById('btnResim').addEventListener('click', () => {
-  state.seed = Math.floor(Math.random() * 999999);
-  calculate();
-  saveState();
-});
+    document.getElementById('btnResim').addEventListener('click', () => {
+      state.seed = Math.floor(Math.random() * 999999);
+      calculate();
+      saveState();
+    });
 
-document.getElementById('btnAddPlan').addEventListener('click', () => {
-  if (state.plans.length >= 10) { alert('最多支持 10 个方案'); return; }
-  document.getElementById('modalPlanName').value = `方案${state.plans.length + 1}`;
-  document.getElementById('modalOverlay').classList.add('open');
-});
+    document.getElementById('btnAddPlan').addEventListener('click', () => {
+      if (state.plans.length >= 10) { alert('最多支持 10 个方案'); return; }
+      document.getElementById('modalPlanName').value = `方案${state.plans.length + 1}`;
+      document.getElementById('modalOverlay').classList.add('open');
+    });
 
-document.getElementById('modalCancel').addEventListener('click', () => {
-  document.getElementById('modalOverlay').classList.remove('open');
-});
+    document.getElementById('modalCancel').addEventListener('click', () => {
+      document.getElementById('modalOverlay').classList.remove('open');
+    });
 
-document.getElementById('modalConfirm').addEventListener('click', () => {
-  const name = document.getElementById('modalPlanName').value.trim() || `方案${state.plans.length + 1}`;
-  const cur = state.plans[state.activePlan];
-  state.plans.push({ ...cur, name });
-  state.activePlan = state.plans.length - 1;
-  document.getElementById('modalOverlay').classList.remove('open');
-  renderPlanTabs();
-  fillForm(state.plans[state.activePlan]);
-  saveState();
-});
+    document.getElementById('modalConfirm').addEventListener('click', () => {
+      const name = document.getElementById('modalPlanName').value.trim() || `方案${state.plans.length + 1}`;
+      const cur = state.plans[state.activePlan];
+      state.plans.push({ ...cur, name });
+      state.activePlan = state.plans.length - 1;
+      document.getElementById('modalOverlay').classList.remove('open');
+      renderPlanTabs();
+      fillForm(state.plans[state.activePlan]);
+      saveState();
+    });
 
-document.getElementById('modalOverlay').addEventListener('click', (e) => {
-  if (e.target === document.getElementById('modalOverlay')) {
-    document.getElementById('modalOverlay').classList.remove('open');
-  }
-});
+    document.getElementById('modalOverlay').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('modalOverlay')) {
+        document.getElementById('modalOverlay').classList.remove('open');
+      }
+    });
 
-// 窗口resize时重绘图表
-window.addEventListener('resize', () => {
-  if (document.getElementById('chartArea').style.display !== 'none') {
-    calculate();
-  }
-});
+    // 窗口resize时重绘图表
+    window.addEventListener('resize', () => {
+      if (document.getElementById('chartArea').style.display !== 'none') {
+        calculate();
+      }
+    });
 
-// ── 初始化 ──
-loadState();
-renderPlanTabs();
-fillForm(state.plans[state.activePlan]);
-// 如果有已保存数据，自动计算
-if (state.plans[state.activePlan].startAsset) {
-  calculate();
-}
-</script>
+    // ── 初始化 ──
+    loadState();
+    renderPlanTabs();
+    fillForm(state.plans[state.activePlan]);
+    // 如果有已保存数据，自动计算
+    if (state.plans[state.activePlan].startAsset) {
+      calculate();
+    }
+  </script>
 </body>
+
 </html>
